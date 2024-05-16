@@ -3,6 +3,8 @@ import { UserRepository } from '../repositories/user.repository';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
+import { UpdateUserDto } from '../dtos/update-user.dto';
+import { User } from '../entity/user.interface';
 
 dotenv.config();
 
@@ -12,7 +14,7 @@ export class UserService {
 
   constructor(private readonly userRepository: UserRepository) { }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     try {
       const findUserExists = await this.userRepository.findOne(createUserDto.name);
 
@@ -26,7 +28,7 @@ export class UserService {
 
       const hash = await bcrypt.hash(password, saltOrRounds);
       const createdUser = await this.userRepository.create({ ...createUserDto, password: hash });
-      
+
       return createdUser;
     } catch (error) {
       this.logger.error(`Error creating User: ${error.message}`, error.stack);
@@ -34,7 +36,7 @@ export class UserService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<User[]> {
     try {
       const foundUsers = await this.userRepository.findAll();
       return foundUsers;
@@ -44,12 +46,32 @@ export class UserService {
     }
   }
 
-  async findOne(email: string) {
+  async findOne(email: string): Promise<User> {
     try {
       const foundUser = await this.userRepository.findOne(email);
       return foundUser;
     } catch (error) {
       this.logger.error(`Error finding User: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    try {
+      const updatedUser = await this.userRepository.update(id, updateUserDto);
+      return updatedUser;
+    } catch (error) {
+      this.logger.error(`Error updating User: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      const deletedUser = await this.userRepository.delete(id);
+      return;
+    } catch (error) {
+      this.logger.error(`Error deleting User: ${error.message}`, error.stack);
       throw error;
     }
   }
