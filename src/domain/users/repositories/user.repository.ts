@@ -1,7 +1,8 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, UnprocessableEntityException } from '@nestjs/common';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import { User } from '../entity/user.interface';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class UserRepository {
@@ -39,4 +40,13 @@ export class UserRepository {
       throw new Error('User not found');
     }
   }
+
+  async findById(id: string): Promise<User> {
+    if(!mongoose.Types.ObjectId.isValid(id)) {
+      throw new UnprocessableEntityException('Invalid id');
+    }
+    const objectId = new mongoose.Types.ObjectId(id);
+    const foundedUser = await this.userModel.findOne({ _id: objectId }).exec();
+    return foundedUser;
+  }  
 }

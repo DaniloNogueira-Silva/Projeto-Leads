@@ -1,10 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { LeadRepository } from '../repositories/lead.repository';
 import { CreateLeadDto } from '../dtos/create-lead.dto';
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
 import { UpdateLeadDto } from '../dtos/update-lead.dto';
 import { Lead } from '../entity/lead.interface';
+import { UserRepository } from 'src/domain/users/repositories/user.repository';
 
 dotenv.config();
 
@@ -12,10 +13,19 @@ dotenv.config();
 export class LeadService {
   private readonly logger = new Logger(LeadService.name);
 
-  constructor(private readonly LeadRepository: LeadRepository) { }
+  constructor(
+    private readonly LeadRepository: LeadRepository,
+    private readonly userRepository: UserRepository,
+  ) { }
 
   async create(createLeadDto: CreateLeadDto): Promise<Lead> {
     try {
+
+      const foundUser = await this.userRepository.findById(createLeadDto.userId);
+
+      if(!foundUser) {
+        throw new NotFoundException('User not found');
+      }
       const createdLead = await this.LeadRepository.create(createLeadDto);
       return createdLead;
     } catch (error) {
