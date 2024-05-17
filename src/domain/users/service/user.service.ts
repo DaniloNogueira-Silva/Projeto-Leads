@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { UserRepository } from '../repositories/user.repository';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
@@ -32,7 +32,7 @@ export class UserService {
       return createdUser;
     } catch (error) {
       this.logger.error(`Error creating User: ${error.message}`, error.stack);
-      throw error;
+      throw new UnprocessableEntityException('Erro ao cadastrar o usuário', error.message);
     }
   }
 
@@ -42,7 +42,7 @@ export class UserService {
       return foundUsers;
     } catch (error) {
       this.logger.error(`Error finding all Users: ${error.message}`, error.stack);
-      throw error;
+      throw new NotFoundException('Erro ao buscar os usuários', error.message);
     }
   }
 
@@ -52,7 +52,7 @@ export class UserService {
       return foundUser;
     } catch (error) {
       this.logger.error(`Error finding User: ${error.message}`, error.stack);
-      throw error;
+      throw new NotFoundException('Erro ao buscar o usuário', error.message);
     }
   }
 
@@ -62,7 +62,7 @@ export class UserService {
       return updatedUser;
     } catch (error) {
       this.logger.error(`Error updating User: ${error.message}`, error.stack);
-      throw error;
+      throw new UnprocessableEntityException('Erro ao cadastrar o usuário', error.message);
     }
   }
 
@@ -72,7 +72,7 @@ export class UserService {
       return;
     } catch (error) {
       this.logger.error(`Error deleting User: ${error.message}`, error.stack);
-      throw error;
+      throw new NotFoundException('Erro ao deletar o usuário', error.message);
     }
   }
 };

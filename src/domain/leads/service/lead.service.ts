@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { LeadRepository } from '../repositories/lead.repository';
 import { CreateLeadDto } from '../dtos/create-lead.dto';
 import * as bcrypt from 'bcrypt';
@@ -23,14 +23,14 @@ export class LeadService {
 
       const foundUser = await this.userRepository.findById(createLeadDto.userId);
 
-      if(!foundUser) {
+      if (!foundUser) {
         throw new NotFoundException('User not found');
       }
       const createdLead = await this.LeadRepository.create(createLeadDto);
       return createdLead;
     } catch (error) {
       this.logger.error(`Error creating Lead: ${error.message}`, error.stack);
-      throw error;
+      throw new UnprocessableEntityException('Erro ao cadastrar o lead', error.message);
     }
   }
 
@@ -40,7 +40,7 @@ export class LeadService {
       return foundLeads;
     } catch (error) {
       this.logger.error(`Error finding all Leads: ${error.message}`, error.stack);
-      throw error;
+      throw new NotFoundException('Erro ao buscar os leads', error.message);
     }
   }
 
@@ -50,7 +50,7 @@ export class LeadService {
       return foundLead;
     } catch (error) {
       this.logger.error(`Error finding Lead: ${error.message}`, error.stack);
-      throw error;
+      throw new NotFoundException('Erro ao buscar o lead', error.message);
     }
   }
 
@@ -60,17 +60,18 @@ export class LeadService {
       return updatedLead;
     } catch (error) {
       this.logger.error(`Error updating Lead: ${error.message}`, error.stack);
-      throw error;
+      throw new UnprocessableEntityException('Erro ao atualizar o lead', error.message);
+
     }
   }
 
   async delete(id: string): Promise<void> {
     try {
-      const deletedLead = await this.LeadRepository.delete(id);
+      await this.LeadRepository.delete(id);
       return;
     } catch (error) {
       this.logger.error(`Error deleting Lead: ${error.message}`, error.stack);
-      throw error;
+      throw new NotFoundException('Erro ao deletar o lead', error.message);
     }
   }
 };
