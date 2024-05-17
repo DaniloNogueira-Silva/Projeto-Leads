@@ -11,7 +11,6 @@ import { AuthGuard } from './auth.guard';
     forwardRef(() => UserModule),
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60s' },
     }),
   ],
   providers: [AuthService, AuthGuard],
