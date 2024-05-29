@@ -26,7 +26,7 @@ export class AuthService {
         if (!isMatch) {
             throw new UnauthorizedException('Senha inválida.');
         }
-        const payload = { email: user.email, id: user._id };
+        const payload = { email: user.email, id: user._id, name: user.name};
         return {
             token: await this.jwtService.signAsync(payload),
         };
