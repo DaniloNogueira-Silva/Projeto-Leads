@@ -10,8 +10,11 @@ export class LeadController {
   constructor(private readonly LeadService: LeadService) { }
 
   @Post()
-  async create(@Body() createLeadDto: CreateLeadDto) {
-    return this.LeadService.create(createLeadDto);
+  async create(
+    @Body() createLeadDto: CreateLeadDto,
+    @Req() req
+  ) {
+    return this.LeadService.create(createLeadDto, req);
   }
 
   @Get()

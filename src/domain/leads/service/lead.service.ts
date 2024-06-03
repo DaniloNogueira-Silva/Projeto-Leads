@@ -6,6 +6,7 @@ import * as dotenv from 'dotenv';
 import { UpdateLeadDto } from '../dtos/update-lead.dto';
 import { Lead } from '../entity/lead.interface';
 import { UserRepository } from 'src/domain/users/repositories/user.repository';
+import { Request } from 'express';
 
 dotenv.config();
 
@@ -18,9 +19,10 @@ export class LeadService {
     private readonly userRepository: UserRepository,
   ) { }
 
-  async create(createLeadDto: CreateLeadDto): Promise<Lead> {
+  async create(createLeadDto: CreateLeadDto, req: Request): Promise<Lead> {
     try {
 
+      console.log('req', req);
       const foundUser = await this.userRepository.findById(createLeadDto.userId);
 
       if (!foundUser) {
