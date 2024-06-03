@@ -7,6 +7,7 @@ import { UpdateLeadDto } from '../dtos/update-lead.dto';
 import { Lead } from '../entity/lead.interface';
 import { UserRepository } from 'src/domain/users/repositories/user.repository';
 import { Request } from 'express';
+import { AuthService } from 'src/domain/auth/auth.service';
 
 dotenv.config();
 
@@ -17,16 +18,22 @@ export class LeadService {
   constructor(
     private readonly LeadRepository: LeadRepository,
     private readonly userRepository: UserRepository,
+    private readonly autService: AuthService
   ) { }
 
-  async create(createLeadDto: CreateLeadDto, req: Request): Promise<Lead> {
+  async create(createLeadDto: CreateLeadDto, host: Request): Promise<Lead> {
     try {
 
-      console.log('req', req);
+      const reqUrl = host.toString();
       const foundUser = await this.userRepository.findById(createLeadDto.userId);
+      const fullUrl = `https://${reqUrl}`
+      console.log(fullUrl)
+      if (foundUser.url !== fullUrl) {
+        throw new NotFoundException('Url não condizente');
+      }
 
       if (!foundUser) {
-        throw new NotFoundException('User not found');
+        throw new NotFoundException('Url não condizente');
       }
       const createdLead = await this.LeadRepository.create(createLeadDto);
       return createdLead;
@@ -36,9 +43,19 @@ export class LeadService {
     }
   }
 
-  async findAll(token): Promise<Lead[]> {
+  async findAll(token: string, host: Request): Promise<Lead[]> {
     try {
+
+      const reqUrl = host.toString();
+      const payload = await this.autService.decodeToken(token);
+      const foundUser = await this.userRepository.findById(payload.id);
+      const fullUrl = `https://${reqUrl}`
+      if (foundUser.url !== fullUrl) {
+        throw new NotFoundException('Url não condizente');
+      }
+
       const foundLeads = await this.LeadRepository.findAll(token);
+
       return foundLeads;
     } catch (error) {
       this.logger.error(`Error finding all Leads: ${error.message}`, error.stack);
@@ -46,8 +63,17 @@ export class LeadService {
     }
   }
 
-  async findOne(email: string): Promise<Lead> {
+  async findOne(email: string, host: Request, token: string): Promise<Lead> {
     try {
+
+      const reqUrl = host.toString();
+      const payload = await this.autService.decodeToken(token);
+      const foundUser = await this.userRepository.findById(payload.id);
+      const fullUrl = `https://${reqUrl}`
+
+      if (foundUser.url !== fullUrl) {
+        throw new NotFoundException('Url não condizente');
+      }
       const foundLead = await this.LeadRepository.findOne(email);
       return foundLead;
     } catch (error) {
@@ -56,8 +82,17 @@ export class LeadService {
     }
   }
 
-  async update(id: string, updateLeadDto: UpdateLeadDto): Promise<Lead> {
+  async update(id: string, updateLeadDto: UpdateLeadDto, host: Request, token: string): Promise<Lead> {
     try {
+      const reqUrl = host.toString();
+      const payload = await this.autService.decodeToken(token);
+      const foundUser = await this.userRepository.findById(payload.id);
+      const fullUrl = `https://${reqUrl}`
+
+      if (foundUser.url !== fullUrl) {
+        throw new NotFoundException('Url não condizente');
+      }
+
       const updatedLead = await this.LeadRepository.update(id, updateLeadDto);
       return updatedLead;
     } catch (error) {
@@ -67,8 +102,16 @@ export class LeadService {
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, host: Request, token: string): Promise<void> {
     try {
+      const reqUrl = host.toString();
+      const payload = await this.autService.decodeToken(token);
+      const foundUser = await this.userRepository.findById(payload.id);
+      const fullUrl = `https://${reqUrl}`
+
+      if (foundUser.url !== fullUrl) {
+        throw new NotFoundException('Url não condizente');
+      }
       await this.LeadRepository.delete(id);
       return;
     } catch (error) {

@@ -14,24 +14,37 @@ export class LeadController {
     @Body() createLeadDto: CreateLeadDto,
     @Req() req
   ) {
-    return this.LeadService.create(createLeadDto, req);
+    return this.LeadService.create(createLeadDto, req.headers.host);
   }
 
   @Get()
-  async getAll(@Req() req) {
+  async getAll(
+    @Req() req) {
     const authHeader = req.headers.authorization;
     const token = authHeader.split(' ')[1];
 
-    return this.LeadService.findAll(token);
+    return this.LeadService.findAll(token, req.headers.host);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateLeadDto: UpdateLeadDto) {
-    return this.LeadService.update(id, updateLeadDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateLeadDto: UpdateLeadDto,
+    @Req() req) {
+
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(' ')[1];
+
+    return this.LeadService.update(id, updateLeadDto, req.headers.host, token);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string) {
-    return this.LeadService.delete(id);
+  async delete(
+    @Param('id') id: string,
+    @Req() req) {
+
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(' ')[1];
+    return this.LeadService.delete(id, req.headers.host, token);
   }
 }
