@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { LeadRepository } from '../repositories/lead.repository';
 import { CreateLeadDto } from '../dtos/create-lead.dto';
 import * as bcrypt from 'bcrypt';
@@ -18,19 +23,14 @@ export class LeadService {
   constructor(
     private readonly LeadRepository: LeadRepository,
     private readonly userRepository: UserRepository,
-    private readonly autService: AuthService
-  ) { }
+    private readonly autService: AuthService,
+  ) {}
 
-  async create(createLeadDto: CreateLeadDto, host: Request): Promise<Lead> {
+  async create(createLeadDto: CreateLeadDto): Promise<Lead> {
     try {
-
-      const reqUrl = host.toString();
-      const foundUser = await this.userRepository.findById(createLeadDto.userId);
-      const fullUrl = `https://${reqUrl}`
-      console.log(fullUrl)
-      if (foundUser.url !== fullUrl) {
-        throw new NotFoundException('Url não condizente');
-      }
+      const foundUser = await this.userRepository.findById(
+        createLeadDto.userId,
+      );
 
       if (!foundUser) {
         throw new NotFoundException('Url não condizente');
@@ -39,41 +39,29 @@ export class LeadService {
       return createdLead;
     } catch (error) {
       this.logger.error(`Error creating Lead: ${error.message}`, error.stack);
-      throw new UnprocessableEntityException('Erro ao cadastrar o lead', error.message);
+      throw new UnprocessableEntityException(
+        'Erro ao cadastrar o lead',
+        error.message,
+      );
     }
   }
 
-  async findAll(token: string, host: Request): Promise<Lead[]> {
+  async findAll(token: string): Promise<Lead[]> {
     try {
-
-      const reqUrl = host.toString();
-      const payload = await this.autService.decodeToken(token);
-      const foundUser = await this.userRepository.findById(payload.id);
-      const fullUrl = `https://${reqUrl}`
-      if (foundUser.url !== fullUrl) {
-        throw new NotFoundException('Url não condizente');
-      }
-
       const foundLeads = await this.LeadRepository.findAll(token);
 
       return foundLeads;
     } catch (error) {
-      this.logger.error(`Error finding all Leads: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error finding all Leads: ${error.message}`,
+        error.stack,
+      );
       throw new NotFoundException('Erro ao buscar os leads', error.message);
     }
   }
 
-  async findOne(email: string, host: Request, token: string): Promise<Lead> {
+  async findOne(email: string): Promise<Lead> {
     try {
-
-      const reqUrl = host.toString();
-      const payload = await this.autService.decodeToken(token);
-      const foundUser = await this.userRepository.findById(payload.id);
-      const fullUrl = `https://${reqUrl}`
-
-      if (foundUser.url !== fullUrl) {
-        throw new NotFoundException('Url não condizente');
-      }
       const foundLead = await this.LeadRepository.findOne(email);
       return foundLead;
     } catch (error) {
@@ -82,36 +70,21 @@ export class LeadService {
     }
   }
 
-  async update(id: string, updateLeadDto: UpdateLeadDto, host: Request, token: string): Promise<Lead> {
+  async update(id: string, updateLeadDto: UpdateLeadDto): Promise<Lead> {
     try {
-      const reqUrl = host.toString();
-      const payload = await this.autService.decodeToken(token);
-      const foundUser = await this.userRepository.findById(payload.id);
-      const fullUrl = `https://${reqUrl}`
-
-      if (foundUser.url !== fullUrl) {
-        throw new NotFoundException('Url não condizente');
-      }
-
       const updatedLead = await this.LeadRepository.update(id, updateLeadDto);
       return updatedLead;
     } catch (error) {
       this.logger.error(`Error updating Lead: ${error.message}`, error.stack);
-      throw new UnprocessableEntityException('Erro ao atualizar o lead', error.message);
-
+      throw new UnprocessableEntityException(
+        'Erro ao atualizar o lead',
+        error.message,
+      );
     }
   }
 
-  async delete(id: string, host: Request, token: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     try {
-      const reqUrl = host.toString();
-      const payload = await this.autService.decodeToken(token);
-      const foundUser = await this.userRepository.findById(payload.id);
-      const fullUrl = `https://${reqUrl}`
-
-      if (foundUser.url !== fullUrl) {
-        throw new NotFoundException('Url não condizente');
-      }
       await this.LeadRepository.delete(id);
       return;
     } catch (error) {
@@ -119,4 +92,4 @@ export class LeadService {
       throw new NotFoundException('Erro ao deletar o lead', error.message);
     }
   }
-};
+}

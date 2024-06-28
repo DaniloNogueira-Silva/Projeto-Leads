@@ -14,7 +14,7 @@ export class LeadController {
     @Body() createLeadDto: CreateLeadDto,
     @Req() req
   ) {
-    return this.LeadService.create(createLeadDto, req.headers.host);
+    return this.LeadService.create(createLeadDto);
   }
 
   @Get()
@@ -23,7 +23,7 @@ export class LeadController {
     const authHeader = req.headers.authorization;
     const token = authHeader.split(' ')[1];
 
-    return this.LeadService.findAll(token, req.headers.host);
+    return this.LeadService.findAll(token);
   }
 
   @Patch(':id')
@@ -35,7 +35,7 @@ export class LeadController {
     const authHeader = req.headers.authorization;
     const token = authHeader.split(' ')[1];
 
-    return this.LeadService.update(id, updateLeadDto, req.headers.host, token);
+    return this.LeadService.update(id, updateLeadDto);
   }
 
   @Delete(':id')
@@ -45,6 +45,6 @@ export class LeadController {
 
     const authHeader = req.headers.authorization;
     const token = authHeader.split(' ')[1];
-    return this.LeadService.delete(id, req.headers.host, token);
+    return this.LeadService.delete(id);
   }
 }
